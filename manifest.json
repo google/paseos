@@ -1,0 +1,13 @@
+{
+  "name": "Paseo",
+  "short_name": "Paseo",
+  "description": "Plot a journey through the web.",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "images/paseos-icon.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ]
+}

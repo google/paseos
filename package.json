@@ -1,0 +1,31 @@
+{
+  "name": "paseos",
+  "version": "1.0.0",
+  "description": "Paseo takes you on a journey.",
+  "main": "index.js",
+  "author": "Diego Wilson",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "polymer serve --port 8080",
+    "test": "polymer test"
+  },
+  "dependencies": {
+    "@polymer/iron-icons": "^3.0.1",
+    "@polymer/paper-button": "^3.0.1",
+    "@polymer/paper-card": "^3.0.1",
+    "@polymer/paper-fab": "^3.0.1",
+    "@polymer/paper-input": "^3.0.1",
+    "@webcomponents/webcomponentsjs": "latest",
+    "lit-element": "latest",
+    "macro-carousel": "^1.0.0",
+    "pwa-helpers": "^0.9.1"
+  },
+  "devDependencies": {
+    "@polymer/test-fixture": "^4.0.2",
+    "chai": "^4.1.2",
+    "eslint": "^5.15.3",
+    "eslint-config-google": "^0.12.0",
+    "mocha": "^5.2.0",
+    "wct-mocha": "^1.0.0"
+  }
+}

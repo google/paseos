@@ -1,0 +1,5 @@
+**/*.pyc
+**/.*.swp
+build/
+node_modules
+configure.js

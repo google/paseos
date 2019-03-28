@@ -1,0 +1,55 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+runtime: python27
+api_version: 1
+threadsafe: true
+skip_files:
+- .git/
+- test/
+- node_modules/
+
+handlers:
+
+- url: /src
+  static_dir: build/default/src
+  secure: always
+
+- url: /manifest.json
+  static_files: build/default/manifest.json
+  upload: build/default/manifest.json
+  secure: always
+
+- url: /images
+  static_dir: build/default/images
+  secure: always
+
+- url: /configure.js
+  static_files: build/default/configure.js
+  upload: build/default/configure.js
+  secure: always
+
+- url: /sw.js
+  static_files: build/default/sw.js
+  upload: build/default/sw.js
+  secure: always
+
+- url: /node_modules
+  static_dir: build/default/node_modules
+  secure: always
+
+- url: /.*
+  static_files: build/default/index.html
+  upload: build/default/index.html
+  secure: always
