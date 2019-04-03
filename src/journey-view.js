@@ -20,10 +20,13 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-fab/paper-fab.js';
 import '@polymer/iron-icons/iron-icons.js';
 import 'macro-carousel/dist/macro-carousel.min.js';
-import './guide-book.js';
 
+/** Displays and interactive journey */
 export class JourneyView extends LitElement {
-  // Only render this page if it's actually visible.
+  /**
+   * Decide if the element should render at all.
+   * @return {boolean}
+   */
   shouldUpdate() {
     return this.active;
   }
@@ -34,9 +37,7 @@ export class JourneyView extends LitElement {
    */
   static get properties() {
     return {
-      journeyID: {type: String},
-      engaged: {type: Boolean},
-      editing: {type: Boolean},
+      guidebook: {type: Object},
       active: {type: Boolean},
     };
   }
@@ -49,18 +50,25 @@ export class JourneyView extends LitElement {
     // Must call superconstructor first.
     super();
     this.active = false;
-    this.journeyID = '';
-    this.engaged = false;
-    this.editing = false;
     this.guidebook = {
+      title: 'Loading...',
+      description: '',
       destinations: [],
     };
   }
 
+  /**
+   * Runs only once the first time the element updates.
+   * @param {object} changedProperties
+   */
   firstUpdated(changedProperties) {
     this.setupServiceWorker();
   }
 
+  /**
+   * Handle a message from the service worker.
+   * @param {object} event
+   */
   handleSWMessage(event) {
     const journey = this.shadowRoot.getElementById('journey');
     console.log('Got event from SW');
@@ -76,6 +84,10 @@ export class JourneyView extends LitElement {
     }
   }
 
+  /**
+   * Handle the registration of the service worker.
+   * @param {object} reg
+   */
   handleSWRegistration(reg) {
     // registration worked
     console.log('Registration succeeded. Scope is ' + reg.scope);
@@ -83,6 +95,7 @@ export class JourneyView extends LitElement {
         this.handleSWMessage.bind(this));
   }
 
+  /** Setup the service worker. */
   setupServiceWorker() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
@@ -94,6 +107,14 @@ export class JourneyView extends LitElement {
     }
   }
 
+  /**
+   * Display a browser notification describing the destination.
+   * @param {string} id
+   * @param {string} title
+   * @param {string} message
+   * @param {boolean} hasPrevious
+   * @param {boolean} hasNext
+   */
   notify(id, title, message, hasPrevious, hasNext) {
     const options = {
       tag: id,
@@ -119,7 +140,16 @@ export class JourneyView extends LitElement {
     });
   }
 
-  openStop(id, title, url, description, hasPrevious, hasNext) {
+  /**
+   * Open a destination in a new window.
+   * @param {string} id
+   * @param {string} title
+   * @param {string} url
+   * @param {string} description
+   * @param {boolean} hasPrevious
+   * @param {boolean} hasNext
+   */
+  openDestination(id, title, url, description, hasPrevious, hasNext) {
     if (url == '') {
       if (document.hasFocus()) {
         console.log('Window has focus. Skip notification.');
@@ -132,16 +162,25 @@ export class JourneyView extends LitElement {
     }
   }
 
-  preloadJourney(guidebook, id) {
+  /**
+   * Open the first destination when a journey first loads.
+   * @param {object} guidebook
+   * @param {string} id
+   */
+  preloadJourney(guidebook) {
     const destinations = guidebook.destinations;
     let hasNext = true;
     if (destinations.length == 1) {
       hasNext = false;
     }
-    this.openStop(id, guidebook.title, destinations[0].url, destinations[0].description, false,
-        hasNext);
+    this.openDestination(guidebook.id, guidebook.title, destinations[0].url,
+        destinations[0].description, false, hasNext);
   }
 
+  /**
+   * Handle newly destination selection.
+   * @param {object} event
+   */
   handleSelectionChange(event) {
     const selectedIndex = event.detail;
     console.log('selected index ' + selectedIndex);
@@ -162,51 +201,33 @@ export class JourneyView extends LitElement {
       hasNext = false;
       nextButton.style.display = 'none';
       console.log('hide next button');
-      this.openStop(this.journeyID, this.guidebook.title,
+      this.openDestination(this.guidebook.id, this.guidebook.title,
           '', 'It\'s the end of the journey!', hasPrevious, hasNext);
     } else {
       const destination = this.guidebook.destinations[selectedIndex];
       console.log(JSON.stringify(destination));
-      this.openStop(this.journeyID, this.guidebook.title, destination.url,
-          destination.description, hasPrevious, hasNext);
+      this.openDestination(this.guidebook.id, this.guidebook.title,
+          destination.url, destination.description, hasPrevious, hasNext);
     }
   }
 
-  renderStop(destination, index) {
+  /**
+   * Render a destination.
+   * @param {object} destination
+   * @param {number} index
+   * @return {object}
+   */
+  renderDestination(destination, index) {
     return html`
-      <div><p class='destination-description'>${destination.description}</p></div>
+      <div>
+        <p class='destination-description'>${destination.description}</p>
+      </div>
       `;
   }
 
-  readFromFirebase(id) {
-    const db = firebase.firestore();
-    const guidebookPromise = db.collection('guidebooks').doc(id).get().then((doc) => {
-      if (doc.exists) {
-        console.log(`${doc.id} => ${doc.data().title}`);
-        return doc.data();
-      } else {
-        // doc.data() will be undefined in this case
-        console.log('No such journey!');
-      }
-    }).catch(function(error) {
-      console.log('Error getting document:', error);
-    });
-
-    return guidebookPromise;
-  }
-
-  async performUpdate() {
-    if (this.journeyID) {
-      console.log('getting guidebook');
-      await this.readFromFirebase(this.journeyID).then((guidebook) => {
-        console.log('got guidebook');
-        console.log(JSON.stringify(guidebook));
-        this.guidebook = guidebook;
-      });
-    }
-    super.performUpdate();
-  }
-
+  /**
+   * Define the CSS of this element.
+   */
   static get styles() {
     return [
       css`
@@ -220,29 +241,13 @@ export class JourneyView extends LitElement {
           flex-grow: 1;
         }
 
-        #departure-container {
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-        }
-
-        #title {
-          display: block;
-          flex-grow: 1;
-          margin-left: 5vmax;
-          margin-top: 5vmax;
-        	font-family: Roboto;
-          font-weight: bold;
-        	font-size: 4em;
-        }
-
         #journey-description {
           display: block;
           flex-grow: 1;
           margin: 5vmax;
-        	font-family: Roboto;
+          font-family: Roboto;
           font-weight: bold;
-        	font-size: 2em;
+          font-size: 2em;
           white-space: pre-wrap;
         }
 
@@ -252,13 +257,7 @@ export class JourneyView extends LitElement {
           color: white;
           text-align: center;
           font-weight: bold;
-        	font-size: 1.7em;
-        }
-
-        #engage-button {
-          margin-left: auto;
-          margin-right: 5vmax;
-          margin-bottom: 5vmax;
+          font-size: 1.7em;
         }
 
         #back-button {
@@ -273,31 +272,16 @@ export class JourneyView extends LitElement {
           margin-bottom: 5vmax;
         }
 
-        #title-container {
-          display: flex;
-          width: 100vw;
-        }
-
         #bottom-buttons {
           display: flex;
           width: 100vw;
         }
 
-        #edit-button {
-          display: block;
-          margin-top: 5vmax;
-          margin-right: 5vmax;
-        }
-
         .destination-description {
-        	font-family: Roboto;
-        	font-size: 2em;
+          font-family: Roboto;
+          font-size: 2em;
           margin: 5vmax;
           white-space: pre-wrap;
-        }
-
-        #edit-view {
-          display: block;
         }
 
         #end-container {
@@ -317,22 +301,30 @@ export class JourneyView extends LitElement {
     ];
   }
 
-  engage() {
-    console.log('engage');
-    this.engaged = true;
-    this.preloadJourney(this.guidebook, this.journeyID);
+  /**
+   * Handle edit click.
+   */
+  handleEditClick() {
+    console.log('Edit button clicked');
+    const editEvent = new CustomEvent('editGuidebook', {
+      detail: this.guidebook,
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(editEvent);
   }
 
-  edit() {
-    console.log('edit');
-    this.editing = true;
-  }
-
+  /**
+   * Go to next destination.
+   */
   next() {
     const journey = this.shadowRoot.getElementById('journey');
     journey.next();
   }
 
+  /**
+   * Go to previous destination.
+   */
   back() {
     const journey = this.shadowRoot.getElementById('journey');
     journey.previous();
@@ -341,41 +333,31 @@ export class JourneyView extends LitElement {
   /**
    * Define a template for the new element by implementing LitElement's
    * `render` function. `render` must return a lit-html TemplateResult.
+   * @return {object}
    */
   render() {
-    if (this.engaged) {
-      return html`
-        <div id='journey-container'>
-        <macro-carousel id='journey' @macro-carousel-selected-changed=${this.handleSelectionChange.bind(this)}>
-          ${this.guidebook.destinations.map(this.renderStop)}
-          <div id='end-container'><div id='end-destination'><img id='end-image' src='/images/beach-island-svgrepo-com.svg'/></div></div>
-        </macro-carousel>
-        <div id='bottom-buttons'>
-        <paper-button id='back-button' @click='${this.back.bind(this)}'>Back</paper-button>
-        <paper-button id='next-button' @click='${this.next.bind(this)}'>Next</paper-button>
+    const handleSelectionChange = this.handleSelectionChange.bind(this);
+    return html`
+      <div id='journey-container'>
+      <macro-carousel id='journey'
+        @macro-carousel-selected-changed=${handleSelectionChange}>
+        ${this.guidebook.destinations.map(this.renderDestination)}
+        <div id='end-container'>
+        <div id='end-destination'>
+        <img id='end-image' src='/images/beach-island-svgrepo-com.svg'/>
         </div>
         </div>
-      `;
-    } else if (this.editing) {
-      return html`
-        <guide-book id='edit-view' guidebook='${JSON.stringify(this.guidebook)}' active></guide-book>
-      `;
-    } else {
-      return html`
-        <div id='departure-container'>
-        <div id='title-container'>
-        <p id='title'>${this.guidebook.title}</p>
-        <paper-fab id='edit-button' icon='create' @click='${this.edit}'></paper-fab>
-        </div>
-        <div id='journey-description'>
-        <p>${this.guidebook.description}</p>
-        </div>
-        <div id='bottom-buttons'>
-        <paper-button id='engage-button' @click='${this.engage}'>Engage!</paper-button>
-        </div>
-        </div>
-      `;
-    }
+      </macro-carousel>
+      <div id='bottom-buttons'>
+      <paper-button id='back-button' @click='${this.back.bind(this)}'>
+        Back
+      </paper-button>
+      <paper-button id='next-button' @click='${this.next.bind(this)}'>
+        Next
+      </paper-button>
+      </div>
+      </div>
+    `;
   }
 }
 

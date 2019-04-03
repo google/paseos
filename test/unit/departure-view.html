@@ -18,7 +18,7 @@ limitations under the License.
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>guide-book</title>
+    <title>departure-view</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
@@ -30,31 +30,38 @@ limitations under the License.
   <body>
     <test-fixture id="basic">
       <template>
-        <guide-book></guide-book>
+        <departure-view></departure-view>
       </template>
     </test-fixture>
 
     <script type="module">
       import '@polymer/test-fixture';
-      import '../../src/guide-book.js';
+      import '../../src/departure-view.js';
 
-      describe('GuideBook', function() {
-        let guidebook;
+      describe('departure-view', function() {
+        let departureView;
         beforeEach(function() {
-          guidebook = fixture('basic');
+          departureView = fixture('basic');
           // Make tests wait until element is rendered.
-          return guidebook.updateComplete;
+          return departureView.updateComplete;
         });
 
         it('starts inactive', function() {
-          expect(guidebook.active).to.be.false;
+          expect(departureView.active).to.be.false;
         });
 
-        it('emits write event', function() {
-          let writeEventSpy = sinon.spy();
-          guidebook.addEventListener('writeGuidebook', writeEventSpy);
-          guidebook.handleWriteClick();
-          expect(writeEventSpy.called).to.be.true;
+        it('emits edit event', function() {
+          let editEventSpy = sinon.spy();
+          departureView.addEventListener('editGuidebook', editEventSpy);
+          departureView.handleEditClick();
+          expect(editEventSpy.called).to.be.true;
+        });
+
+        it('emits engage event', function() {
+          let engageEventSpy = sinon.spy();
+          departureView.addEventListener('engageJourney', engageEventSpy);
+          departureView.handleEngageClick();
+          expect(engageEventSpy.called).to.be.true;
         });
       });
     </script>
