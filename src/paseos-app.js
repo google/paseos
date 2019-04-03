@@ -16,11 +16,14 @@ limitations under the License.
 
 // Import LitElement base class and html helper function
 import {LitElement, html, css} from 'lit-element';
+import './departure-view.js';
 import './guide-book.js';
 import './journey-view.js';
 import config from '/configure.js';
 import {installRouter} from 'pwa-helpers/router.js';
+import FirebaseAdapter from './firebase-adapter.js';
 
+/** Application shell */
 export class PaseoApp extends LitElement {
   /**
    * Define properties. Properties defined here will be automatically
@@ -29,7 +32,7 @@ export class PaseoApp extends LitElement {
   static get properties() {
     return {
       activePage: {type: String},
-      journeyID: {type: String},
+      guidebook: {type: Object},
     };
   }
 
@@ -41,22 +44,25 @@ export class PaseoApp extends LitElement {
     super();
 
     this.activePage = 'guide-book';
-    this.journeyID = '';
+    this.guidebook = {
+      title: '',
+      description: '',
+      destinations: [
+        {
+          url: '',
+          description: '',
+        },
+      ],
+    };
 
-    firebase.initializeApp(config);
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        console.log('user signed in ' + JSON.stringify(user));
-      } else {
-        console.log('signing in user');
-        firebase.auth().signInWithRedirect(provider);
-      }
-    });
+    this.firebaseAdapter = new FirebaseAdapter(config);
 
     installRouter((location) => this.navigate(location));
   }
 
+  /**
+   * Define the CSS of this element.
+   */
   static get styles() {
     return [
       css`
@@ -71,26 +77,77 @@ export class PaseoApp extends LitElement {
     ];
   }
 
+  /**
+   * Change browser URL.
+   * @param {string} location
+   */
   navigate(location) {
-    console.log('navigate()');
-    console.log(location.pathname);
     const currentPath = location.pathname.split('/');
     if (currentPath.length > 1 && currentPath[1] == 'journey') {
       const id = currentPath[2];
-      console.log('id: ' + id);
-      this.activePage = 'journey-view';
-      this.journeyID = id;
+      this.activePage = 'departure-view';
+      this.firebaseAdapter.read(id).then((guidebook) => {
+        guidebook.id = id;
+        this.guidebook = guidebook;
+      });
+    } else {
+      this.activePage = 'guide-book';
     }
+  }
+
+  /**
+   * Handle writeGuidebook event.
+   * @param {object} e
+   */
+  handleWriteGuidebook(e) {
+    const guidebook = e.detail;
+    this.firebaseAdapter.write(guidebook);
+  }
+
+  /**
+   * Handle editGuidebook event.
+   * @param {object} e
+   */
+  handleEditGuidebook(e) {
+    console.log('handle edit guidebook');
+    this.guidebook = e.detail;
+    window.history.pushState('', '', '/');
+    const top = new URL('/', window.location.href);
+    this.navigate(top);
+  }
+
+  /**
+   * Handle engageJourney event.
+   * @param {object} e
+   */
+  handleEngageJourney(e) {
+    console.log('handle engage journey');
+    this.guidebook = e.detail;
+    this.activePage = 'journey-view';
   }
 
   /**
    * Define a template for the new element by implementing LitElement's
    * `render` function. `render` must return a lit-html TemplateResult.
+   * @return {object}
    */
   render() {
+    const handleWriteGuidebook = this.handleWriteGuidebook.bind(this);
+    const handleEditGuidebook = this.handleEditGuidebook.bind(this);
+    const handleEngageJourney = this.handleEngageJourney.bind(this);
     return html`
-      <journey-view class='page' journeyID="${this.journeyID}" ?active="${this.activePage === 'journey-view'}"></journey-view>
-      <guide-book class='page' ?active="${this.activePage === 'guide-book'}"></guide-book>
+      <departure-view class='page' guidebook='${JSON.stringify(this.guidebook)}'
+        @editGuidebook='${handleEditGuidebook}'
+        @engageJourney='${handleEngageJourney}'
+        ?active="${this.activePage === 'departure-view'}">
+      </departure-view>
+      <journey-view class='page' guidebook='${JSON.stringify(this.guidebook)}'
+        ?active="${this.activePage === 'journey-view'}">
+      </journey-view>
+      <guide-book class='page' guidebook='${JSON.stringify(this.guidebook)}'
+        @writeGuidebook='${handleWriteGuidebook}'
+        ?active="${this.activePage === 'guide-book'}">
+      </guide-book>
     `;
   }
 }

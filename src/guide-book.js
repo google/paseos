@@ -24,8 +24,12 @@ import '@polymer/paper-fab/paper-fab.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/font-roboto/roboto.js';
 
+/** Creates and edits guidebooks */
 export class GuideBook extends LitElement {
-  // Only render this page if it's actually visible.
+  /**
+   * Decide if the element should render at all.
+   * @return {boolean}
+   */
   shouldUpdate() {
     return this.active;
   }
@@ -63,7 +67,10 @@ export class GuideBook extends LitElement {
     };
   }
 
-  addStop() {
+  /**
+   * Add a destination to the guidebook.
+   */
+  addDestination() {
     this.guidebook.destinations.push({
       url: '',
       description: '',
@@ -71,27 +78,42 @@ export class GuideBook extends LitElement {
     this.requestUpdate();
   }
 
-  write() {
-    console.log('Writing guide book');
-    console.log(JSON.stringify(this.guidebook, undefined, 2));
-    firebase.firestore().collection('guidebooks').add(this.guidebook)
-        .then(function(ref) {
-          console.log('Wrote guidebook with id: ', ref.id);
-          window.open('/journey/' + ref.id, '_self');
-        })
-        .catch(function(error) {
-          console.error('Error writing guidebook: ', error);
-        });
+  /**
+   * Handle write button click.
+   */
+  handleWriteClick() {
+    const writeEvent = new CustomEvent('writeGuidebook', {
+      detail: this.guidebook,
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(writeEvent);
   }
 
-  renderStop(destination, index) {
+  /**
+   * Render a single destination editor.
+   * @param {object} destination
+   * @param {number} index
+   * @return {object}
+   */
+  renderDestination(destination, index) {
     const guidebook = this.guidebook;
+    /**
+     * Handle a change in the description text.
+     * @param {object} e
+     */
     function handleDescriptionChange(e) {
       guidebook.destinations[index].description = e.target.value;
     }
+
+    /**
+     * Handle a change in the URL.
+     * @param {object} e
+   */
     function handleURLChange(e) {
       guidebook.destinations[index].url = e.target.value;
     }
+
     return html`
       <paper-card>
       <paper-input label='URL' no-label-float value='${destination.url}'
@@ -104,6 +126,9 @@ export class GuideBook extends LitElement {
       `;
   }
 
+  /**
+   * Define the CSS of this element.
+   */
   static get styles() {
     return [
       css`
@@ -165,29 +190,48 @@ export class GuideBook extends LitElement {
   /**
    * Define a template for the new element by implementing LitElement's
    * `render` function. `render` must return a lit-html TemplateResult.
+   * @return {object}
    */
   render() {
+    const guidebook = this.guidebook;
+
+    /**
+     * Handle a change in the title.
+     * @param {object} e
+     */
+    function handleTitleChange(e) {
+      guidebook.title = e.target.value;
+    }
+
+    /**
+     * Handle a change in the description.
+     * @param {object} e
+     */
+    function handleDescriptionChange(e) {
+      guidebook.description = e.target.value;
+    }
+
+    const handleWriteClick = this.handleWriteClick.bind(this);
+
     return html`
       <p id='title'>Create a new journey</p>
 
       <div id='inputs'>
       <paper-card>
-      <paper-input label='Title' no-label-float value='${this.guidebook.title}'
-        @change='${(e) => {
-          this.guidebook.title = e.target.value;
-        }}'>
+      <paper-input label='Title' no-label-float value='${guidebook.title}'
+        @change='${handleTitleChange}'>
      </paper-input>
-      <paper-textarea label='Description' value='${this.guidebook.description}'
-        @value-changed='${(e) => {
-          this.guidebook.description = e.target.value;
-        }}'>
+      <paper-textarea label='Description' value='${guidebook.description}'
+        @value-changed='${handleDescriptionChange}'>
       </paper-textarea>
       </paper-card>
 
-      ${this.guidebook.destinations.map(this.renderStop.bind(this))}
-      <paper-fab id='add-button' icon='add' @click='${this.addStop}'>
+      ${guidebook.destinations.map(this.renderDestination.bind(this))}
+      <paper-fab id='add-button' icon='add' @click='${this.addDestination}'>
       </paper-fab>
-      <paper-button id='write-button' @click='${this.write}'>Go</paper-button>
+      <paper-button id='write-button' @click='${handleWriteClick}'>
+        Go
+      </paper-button>
       </div>
     `;
   }

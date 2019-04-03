@@ -18,13 +18,14 @@ limitations under the License.
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>my-view1</title>
+    <title>journey-view</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
     <script src="../../node_modules/chai/chai.js"></script>
     <script src="../../node_modules/mocha/mocha.js"></script>
     <script src="../../node_modules/wct-mocha/wct-mocha.js"></script>
+    <script src="../../node_modules/sinon/pkg/sinon.js"></script>
   </head>
   <body>
     <test-fixture id="basic">
@@ -37,16 +38,16 @@ limitations under the License.
       import '@polymer/test-fixture';
       import '../../src/journey-view.js';
 
-      suite('journey-view tests', function() {
-        let el;
-        setup(function() {
-          el = fixture('basic');
+      describe('journey-view', function() {
+        let journeyView;
+        beforeEach(function() {
+          journeyView = fixture('basic');
           // Make tests wait until element is rendered.
-          return el.updateComplete;
+          return journeyView.updateComplete;
         });
 
-        test('starts inactive', function() {
-          assert.equal(el.active, false);
+        it('starts inactive', function() {
+          expect(journeyView.active).to.be.false;
         });
       });
     </script>

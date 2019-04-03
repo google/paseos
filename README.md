@@ -17,7 +17,8 @@ notes to show along the way.
 To setup this project:
 
 1. Add a configuration file with the syntax of configure.template.js.
-2. Run `npm install`.
+1. Install polymer-cli `npm install -g polymer-cli`.
+1. Run `npm install`.
 
 # Running
 
