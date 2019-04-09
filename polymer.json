@@ -7,6 +7,7 @@
   ],
   "extraDependencies": [
     "node_modules/@webcomponents/webcomponentsjs/**",
+    "firebase-config.json",
     "manifest.json"
   ],
   "npm": true,

@@ -35,9 +35,9 @@ handlers:
   static_dir: build/default/images
   secure: always
 
-- url: /configure.js
-  static_files: build/default/configure.js
-  upload: build/default/configure.js
+- url: /firebase-config.json
+  static_files: build/default/firebase-config.json
+  upload: build/default/firebase-config.json
   secure: always
 
 - url: /sw.js
