@@ -16,7 +16,6 @@ notes to show along the way.
 
 To setup this project:
 
-1. Add a configuration file with the syntax of configure.template.js.
 1. Install polymer-cli `npm install -g polymer-cli`.
 1. Run `npm install`.
 
@@ -31,3 +30,9 @@ To execute tests run `npm test`.
 # Deployment
 
 This project may be deployed to Google App Engine by running `deploy.sh`.
+
+# Configure Firebase database
+
+The project uses a local IndexedDB database by default. If you would
+like to use a Firebase database instead then add a firebase-config.json
+file at the root. You may use the template at firebase-config.template.json.

@@ -19,9 +19,9 @@ import {LitElement, html, css} from 'lit-element';
 import './departure-view.js';
 import './guide-book.js';
 import './journey-view.js';
-import config from '/configure.js';
 import {installRouter} from 'pwa-helpers/router.js';
 import FirebaseAdapter from './firebase-adapter.js';
+import IndexedDBAdapter from './indexeddb-adapter.js';
 
 /** Application shell */
 export class PaseoApp extends LitElement {
@@ -55,9 +55,22 @@ export class PaseoApp extends LitElement {
       ],
     };
 
-    this.firebaseAdapter = new FirebaseAdapter(config);
-
-    installRouter((location) => this.navigate(location));
+    // Replace ./data.json with your JSON feed
+    fetch('../firebase-config.json')
+        .then((response) => {
+          return response.json();
+        })
+        .then((config) => {
+          // Work with JSON data here
+          console.log(JSON.stringify(config));
+          this.databaseAdapter = new FirebaseAdapter(config);
+          installRouter((location) => this.navigate(location));
+        })
+        .catch((err) => {
+          // Do something for an error here
+          this.databaseAdapter = new IndexedDBAdapter();
+          installRouter((location) => this.navigate(location));
+        });
   }
 
   /**
@@ -86,7 +99,7 @@ export class PaseoApp extends LitElement {
     if (currentPath.length > 1 && currentPath[1] == 'journey') {
       const id = currentPath[2];
       this.activePage = 'departure-view';
-      this.firebaseAdapter.read(id).then((guidebook) => {
+      this.databaseAdapter.read(id).then((guidebook) => {
         guidebook.id = id;
         this.guidebook = guidebook;
       });
@@ -101,7 +114,14 @@ export class PaseoApp extends LitElement {
    */
   handleWriteGuidebook(e) {
     const guidebook = e.detail;
-    this.firebaseAdapter.write(guidebook);
+    this.databaseAdapter.write(guidebook)
+        .then(function(id) {
+          console.log('Wrote guidebook with id: ', id);
+          window.open('/journey/' + id, '_self');
+        })
+        .catch(function(error) {
+          console.error('Error writing guidebook: ', error);
+        });
   }
 
   /**

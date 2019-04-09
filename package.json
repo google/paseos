@@ -18,6 +18,7 @@
     "@polymer/paper-fab": "^3.0.1",
     "@polymer/paper-input": "^3.0.1",
     "@webcomponents/webcomponentsjs": "latest",
+    "idb": "^4.0.3",
     "lit-element": "latest",
     "macro-carousel": "^1.0.0",
     "pwa-helpers": "^0.9.1"

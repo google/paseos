@@ -33,18 +33,20 @@ export default class FirebaseAdapter {
   /**
    * Write the guidebook to the database.
    * @param {object} guidebook
+   * @return {Promise}
    */
   write(guidebook) {
     console.log('Writing guide book');
     console.log(JSON.stringify(guidebook, undefined, 2));
-    firebase.firestore().collection('guidebooks').add(guidebook)
-        .then(function(ref) {
-          console.log('Wrote guidebook with id: ', ref.id);
-          window.open('/journey/' + ref.id, '_self');
-        })
-        .catch(function(error) {
-          console.error('Error writing guidebook: ', error);
-        });
+    return new Promise((resolve, reject) => {
+      firebase.firestore().collection('guidebooks').add(guidebook)
+          .then(function(ref) {
+            resolve(ref.id);
+          })
+          .catch(function(error) {
+            reject(error);
+          });
+    });
   }
 
   /**
