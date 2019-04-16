@@ -14,8 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ ! -f configure.js ]; then
-echo "Add a configure.js file. See configure.template.js for details."
-exit
-fi
 npm install

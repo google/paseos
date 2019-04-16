@@ -16,12 +16,12 @@ notes to show along the way.
 
 To setup this project:
 
-1. Install polymer-cli `npm install -g polymer-cli`.
+1. Install [node.js](https://nodejs.org/en/).
 1. Run `npm install`.
 
 # Running
 
-The project can be hosted locally by executing `run.sh`.
+The project can be hosted locally by executing `npm start`.
 
 # Test
 
