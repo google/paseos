@@ -7,9 +7,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "polymer serve --port 8080",
-    "test": "polymer test",
-    "lint": "eslint src/*",
-    "watch": "nodemon --exec \"npm run lint && npm test && npm start\""
+    "test": "eslint src/* && polymer test",
+    "watch": "nodemon --exec \"npm test && npm start\""
   },
   "dependencies": {
     "@polymer/iron-icons": "^3.0.1",
