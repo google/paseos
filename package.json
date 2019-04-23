@@ -7,8 +7,12 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "polymer serve --port 8080",
-    "test": "eslint src/* && polymer test",
-    "watch": "nodemon --exec \"npm test && npm start\""
+    "test": "npm run lint && npm run test:unit",
+    "lint": "eslint src/*",
+    "test:unit": "polymer test",
+    "test:integration": "mocha test/integration --timeout=10000",
+    "watch": "nodemon --exec \"npm test && npm start\"",
+    "screenshots": "mocha test/integration/screenshots/generate.js --timeout=15000"
   },
   "dependencies": {
     "@polymer/iron-icons": "^3.0.1",
@@ -20,7 +24,11 @@
     "idb": "^4.0.3",
     "lit-element": "latest",
     "macro-carousel": "^1.0.0",
+    "pixelmatch": "^4.0.2",
+    "pngjs": "^3.4.0",
     "polymer-cli": "^1.9.8",
+    "polyserve": "^0.27.15",
+    "puppeteer": "^1.14.0",
     "pwa-helpers": "^0.9.1"
   },
   "devDependencies": {
