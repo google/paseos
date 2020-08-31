@@ -148,12 +148,14 @@ export class GuideBook extends LitElement {
         }
 
         #add-button {
+          border-radius: 50px;
           display: block;
           margin-left: auto;
           margin-right: auto;
         }
 
         #write-button {
+          border-radius: 50px;
           display: block;
           margin-left: auto;
           background: #4285f4;
