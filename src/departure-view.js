@@ -71,7 +71,7 @@ export class DepartureView extends LitElement {
 
         #title {
           display: block;
-          flex-grow: 1;
+          flex-grow: 2;
           margin-left: 5vmax;
           margin-top: 5vmax;
           font-family: Roboto;
@@ -85,7 +85,7 @@ export class DepartureView extends LitElement {
           margin: 5vmax;
           font-family: Roboto;
           font-weight: bold;
-          font-size: 2em;
+          font-size: 2.5em;
           white-space: pre-wrap;
         }
 
