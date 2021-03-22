@@ -50,11 +50,40 @@ limitations under the License.
           expect(guidebook.active).to.be.false;
         });
 
-        it('emits write event', function() {
+        it('emits write event if isValid is true', function() {
           let writeEventSpy = sinon.spy();
+          let isValid = sinon.stub(guidebook, 'validateGuidebook');
+          isValid.returns(true);
           guidebook.addEventListener('writeGuidebook', writeEventSpy);
           guidebook.handleWriteClick();
           expect(writeEventSpy.called).to.be.true;
+        });
+
+        it('does not emit write event if isValid is false', function() {
+          let writeEventSpy = sinon.spy();
+          let isValid = sinon.stub(guidebook, 'validateGuidebook');
+          isValid.returns(false);
+          guidebook.addEventListener('writeGuidebook', writeEventSpy);
+          guidebook.handleWriteClick();
+          expect(writeEventSpy.called).to.be.false;
+        });
+
+        it('validateGuidebook returns false if any of validate is false', function() {
+          let getElementByIdStub = sinon.stub(guidebook.shadowRoot, 'getElementById');
+          let falseStub = sinon.stub().returns(false);
+          let trueStub = sinon.stub().returns(true);
+          getElementByIdStub.withArgs('guidebook-title').returns({validate: trueStub});
+          getElementByIdStub.withArgs('guidebook-description').returns({validate: trueStub});
+          getElementByIdStub.withArgs('destination-url').returns({validate: trueStub});
+          getElementByIdStub.withArgs('destination-description').returns({validate: falseStub});
+          expect(guidebook.validateGuidebook()).to.be.false;
+        });
+
+        it('validateGuidebook returns true if all the validate are true', function() {
+          let getElementByIdStub = sinon.stub(guidebook.shadowRoot, 'getElementById');
+          let trueStub = sinon.stub().returns(true);
+          getElementByIdStub.returns({validate: trueStub});
+          expect(guidebook.validateGuidebook()).to.be.true;
         });
       });
     </script>

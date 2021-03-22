@@ -79,15 +79,29 @@ export class GuideBook extends LitElement {
   }
 
   /**
+   * Validates that title, descriptions and url are not empty.
+   * @return {boolean}
+   */
+  validateGuidebook() {
+    return this.shadowRoot.getElementById('guidebook-title').validate() &&
+      this.shadowRoot.getElementById('guidebook-description').validate() &&
+      this.shadowRoot.getElementById('destination-url').validate() &&
+      this.shadowRoot.getElementById('destination-description').validate();
+  }
+
+  /**
    * Handle write button click.
    */
   handleWriteClick() {
-    const writeEvent = new CustomEvent('writeGuidebook', {
-      detail: this.guidebook,
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(writeEvent);
+    const isValid = this.validateGuidebook();
+    if (isValid) {
+      const writeEvent = new CustomEvent('writeGuidebook', {
+        detail: this.guidebook,
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(writeEvent);
+    }
   }
 
   /**
@@ -116,10 +130,11 @@ export class GuideBook extends LitElement {
 
     return html`
       <paper-card>
-      <paper-input label='URL' no-label-float value='${destination.url}'
-        @change='${handleURLChange}'>
+      <paper-input id='destination-url' label='URL' no-label-float
+        required=true value='${destination.url}' @change='${handleURLChange}'>
       </paper-input>
-      <paper-textarea label='Description' value='${destination.description}'
+      <paper-textarea id='destination-description' label='Description'
+        required=true value='${destination.description}'
         @value-changed='${handleDescriptionChange}'>
       </paper-textarea>
       </paper-card>
@@ -218,11 +233,12 @@ export class GuideBook extends LitElement {
 
       <div id='inputs'>
       <paper-card>
-      <paper-input label='Title' no-label-float value='${guidebook.title}'
-        @change='${handleTitleChange}'>
+      <paper-input id='guidebook-title' label='Title' no-label-float
+       required=true value='${guidebook.title}' @change='${handleTitleChange}'>
      </paper-input>
-      <paper-textarea label='Description' value='${guidebook.description}'
-        @value-changed='${handleDescriptionChange}'>
+      <paper-textarea id='guidebook-description' label='Description'
+       required=true value='${guidebook.description}'
+       @value-changed='${handleDescriptionChange}'>
       </paper-textarea>
       </paper-card>
 
